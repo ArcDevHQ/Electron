@@ -1,6 +1,8 @@
 package lol.vifez.electron.game.queue.menu;
 
 import lol.vifez.electron.Practice;
+import lol.vifez.electron.game.queue.menu.ranked.RankedMenu;
+import lol.vifez.electron.game.queue.menu.unranked.UnrankedMenu;
 import lol.vifez.electron.util.ItemBuilder;
 import lol.vifez.electron.util.menu.Menu;
 import lol.vifez.electron.util.menu.button.Button;

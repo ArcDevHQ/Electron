@@ -1,8 +1,7 @@
-package lol.vifez.electron.game.queue.menu;
+package lol.vifez.electron.game.queue.menu.unranked;
 
 import lol.vifez.electron.Practice;
 import lol.vifez.electron.game.kit.Kit;
-import lol.vifez.electron.profile.Profile;
 import lol.vifez.electron.util.CC;
 import lol.vifez.electron.util.ItemBuilder;
 import lol.vifez.electron.util.menu.Menu;
@@ -11,16 +10,15 @@ import lol.vifez.electron.util.menu.button.impl.EasyButton;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/* 
+/*
  * Electron © Vifez
  * Developed by Vifez
  * Copyright (c) 2025 Vifez. All rights reserved.
-*/
+ */
 
 @RequiredArgsConstructor
 public class UnrankedMenu extends Menu {
@@ -42,7 +40,11 @@ public class UnrankedMenu extends Menu {
         Map<Integer, Button> buttons = new HashMap<>();
 
         Kit[] kits = instance.getKitManager().getKits().values().toArray(new Kit[0]);
-        int[] kitSlots = {10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30};
+        int[] kitSlots = {
+                10, 11, 12, 13, 14, 15, 16,
+                19, 20, 21, 22, 23, 24, 25,
+                28, 29, 30
+        };
 
         for (int i = 0; i < kits.length && i < kitSlots.length; i++) {
             buttons.put(kitSlots[i], new KitButton(instance, player, kits[i]));
@@ -60,7 +62,10 @@ public class UnrankedMenu extends Menu {
                             .durability((short) 15)
                             .name("&7")
                             .build(),
-                    true, false, () -> {}));
+                    true,
+                    false,
+                    () -> {}
+            ));
         }
 
         buttons.put(4, new EasyButton(
@@ -77,46 +82,18 @@ public class UnrankedMenu extends Menu {
                     }
 
                     Kit randomKit = kits[(int) (Math.random() * kits.length)];
-                    Profile profile = instance.getProfileManager().getProfile(player.getUniqueId());
-
-                    instance.getQueueManager().getQueue(randomKit, false).add(profile.getPlayer());
+                    instance.getQueueManager().addPlayer(player, randomKit, false);
 
                     CC.sendMessage(player, " ");
-                    CC.sendMessage(player, "&e&lRandom Queue &7[UR]");
-                    CC.sendMessage(player, "&e• &7Kit: &e" + randomKit.getName());
-                    CC.sendMessage(player, "&e• &7Searching for a &eplayer...");
+                    CC.sendMessage(player, "&b&lUnranked Queue");
+                    CC.sendMessage(player, "&b• &7Kit: &b" + randomKit.getName());
+                    CC.sendMessage(player, "&b• &7Searching for a &bplayer...");
                     CC.sendMessage(player, " ");
+
                     player.closeInventory();
                 }
         ));
 
         return buttons;
-    }
-}
-
-class KitButton extends EasyButton {
-
-    public KitButton(Practice instance, Player player, Kit kit) {
-        super(new ItemBuilder(kit.getDisplayItem())
-                .name("&b&l" + kit.getName())
-                .lore(
-                        "&fPlaying&7: &b" + instance.getMatchManager().getTotalPlayersInMatches(),
-                        "&fIn Queue&7: &b" + instance.getQueueManager().getPlayersQueue().size(),
-                        "",
-                        "&aClick to queue"
-                )
-                .flag(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_POTION_EFFECTS, ItemFlag.HIDE_ENCHANTS)
-                .build(), true, false, () -> {
-            Profile profile = instance.getProfileManager().getProfile(player.getUniqueId());
-            instance.getQueueManager().getQueue(kit, false).add(profile.getPlayer());
-
-            CC.sendMessage(player, " ");
-            CC.sendMessage(player, "&b&lUnranked Queue");
-            CC.sendMessage(player, "&b• &7Kit: &b" + kit.getName());
-            CC.sendMessage(player, "&b• &7Searching for a &bplayer...");
-            CC.sendMessage(player, " ");
-
-            player.closeInventory();
-        });
     }
 }

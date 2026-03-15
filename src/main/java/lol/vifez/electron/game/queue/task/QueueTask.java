@@ -7,11 +7,11 @@ import lol.vifez.electron.game.queue.QueueManager;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.scheduler.BukkitRunnable;
 
-/* 
+/*
  * Electron © Vifez
  * Developed by Vifez
  * Copyright (c) 2025 Vifez. All rights reserved.
-*/
+ */
 
 @RequiredArgsConstructor
 public class QueueTask extends BukkitRunnable {
@@ -22,14 +22,16 @@ public class QueueTask extends BukkitRunnable {
     public void run() {
         for (Kit kit : Practice.getInstance().getKitManager().getKits().values()) {
             if (queueManager.getQueue(kit, false) == null) {
-                queueManager.getQueueMap().put(kit.getName(), new Queue(Practice.getInstance(), kit, false));
+                queueManager.getQueueMap().put(kit.getName(), new Queue(kit, false));
+            }
 
-                if (kit.isRanked()) {
-                    queueManager.getQueueMap().put("ranked_" + kit.getName(), new Queue(Practice.getInstance(), kit, true));
-                }
+            if (kit.isRanked() && queueManager.getQueue(kit, true) == null) {
+                queueManager.getQueueMap().put("ranked_" + kit.getName(), new Queue(kit, true));
             }
         }
 
-        queueManager.getQueueMap().values().forEach(Queue::move);
+        for (Queue queue : queueManager.getQueueMap().values()) {
+            queueManager.move(queue);
+        }
     }
 }

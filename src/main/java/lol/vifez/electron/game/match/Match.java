@@ -60,7 +60,6 @@ public class Match {
     @Setter private BukkitTask countdownTask;
 
     private final Instant startTime = Instant.now();
-
     private final Map<UUID, Integer> hitsMap = new HashMap<>();
 
     public Match(Practice instance, Profile playerOne, Profile playerTwo, Kit kit, Arena arena, boolean ranked) {
@@ -81,33 +80,42 @@ public class Match {
         long hours = seconds / 3600;
         long minutes = (seconds % 3600) / 60;
         long remainingSeconds = seconds % 60;
+
         return String.format("%02d:%02d:%02d", hours, minutes, remainingSeconds);
     }
 
     public Profile getOpponent(Profile profile) {
         UUID uuid = profile.getUuid();
-        if (uuid.equals(playerOne.getUuid())) return playerTwo;
-        if (uuid.equals(playerTwo.getUuid())) return playerOne;
+
+        if (uuid.equals(playerOne.getUuid())) {
+            return playerTwo;
+        }
+
+        if (uuid.equals(playerTwo.getUuid())) {
+            return playerOne;
+        }
 
         return null;
     }
 
     public void denyMovement(Player player) {
-        if (player == null) return;
+        if (player == null) {
+            return;
+        }
 
         player.setHealth(player.getMaxHealth());
         player.setWalkSpeed(WALK_SPEED_FROZEN);
         player.setFlySpeed(FLY_SPEED_FROZEN);
         player.setFoodLevel(FOOD_FROZEN);
         player.setSprinting(false);
-
         player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, Integer.MAX_VALUE, FREEZE_JUMP_AMPLIFIER));
-
         player.setGameMode(GameMode.SURVIVAL);
     }
 
     public void allowMovement(Player player) {
-        if (player == null) return;
+        if (player == null) {
+            return;
+        }
 
         player.removePotionEffect(PotionEffectType.JUMP);
         player.setHealth(player.getMaxHealth());
@@ -119,13 +127,16 @@ public class Match {
     }
 
     public void teleportAndSetup(Profile profile, boolean firstSpawn) {
-        if (profile == null) return;
+        if (profile == null) {
+            return;
+        }
 
         Player player = profile.getPlayer();
-        if (player == null) return;
+        if (player == null) {
+            return;
+        }
 
         player.teleport(firstSpawn ? arena.getSpawnA() : arena.getSpawnB());
-
         player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
 
         denyMovement(player);
@@ -134,9 +145,5 @@ public class Match {
         player.getInventory().setContents(contents);
         player.getInventory().setArmorContents(kit.getArmorContents());
         player.updateInventory();
-
-        if (profile.getQueue() != null) {
-            profile.getQueue().remove(player);
-        }
     }
 }

@@ -6,10 +6,9 @@ import lol.vifez.electron.game.queue.RankedAccess;
 import lol.vifez.electron.leaderboard.menu.LeaderboardMenu;
 import lol.vifez.electron.navigator.menu.NavigatorMenu;
 import lol.vifez.electron.profile.Profile;
-import lol.vifez.electron.game.queue.Queue;
 import lol.vifez.electron.game.queue.menu.QueuesMenu;
-import lol.vifez.electron.game.queue.menu.RankedMenu;
-import lol.vifez.electron.game.queue.menu.UnrankedMenu;
+import lol.vifez.electron.game.queue.menu.ranked.RankedMenu;
+import lol.vifez.electron.game.queue.menu.unranked.UnrankedMenu;
 import lol.vifez.electron.settings.menu.OptionsMenu;
 import lol.vifez.electron.util.CC;
 import org.bukkit.entity.Player;
@@ -114,13 +113,7 @@ public final class HotbarListener implements Listener {
         });
 
         actions.put(Hotbar.LEAVE_QUEUE, player -> {
-            Queue queue = instance.getQueueManager().getQueue(player.getUniqueId());
-            if (queue != null) {
-                queue.remove(player);
-            }
-
-            player.getInventory().setContents(instance.getHotbarManager().getSpawnItems());
-            player.getInventory().setArmorContents(null);
+            instance.getQueueManager().removePlayer(player);
             CC.sendMessage(player, "&cYou left the queue!");
         });
     }

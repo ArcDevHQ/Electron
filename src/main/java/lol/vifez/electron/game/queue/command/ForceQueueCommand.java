@@ -7,7 +7,6 @@ import co.aikar.commands.annotation.Default;
 import lol.vifez.electron.Practice;
 import lol.vifez.electron.game.kit.Kit;
 import lol.vifez.electron.profile.Profile;
-import lol.vifez.electron.game.queue.Queue;
 import lol.vifez.electron.util.CC;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,7 +15,7 @@ import org.bukkit.entity.Player;
  * Electron © Vifez
  * Developed by Vifez
  * Copyright (c) 2025 Vifez. All rights reserved.
-*/
+ */
 
 @CommandAlias("forcequeue")
 @CommandPermission("practice.admin")
@@ -24,6 +23,7 @@ public class ForceQueueCommand extends BaseCommand {
 
     @Default
     public void onForceQueue(Player sender, String targetName, String kitName) {
+
         Player target = Bukkit.getPlayerExact(targetName);
         if (target == null) {
             sender.sendMessage(CC.translate("&cPlayer is offline."));
@@ -31,10 +31,10 @@ public class ForceQueueCommand extends BaseCommand {
         }
 
         Practice instance = Practice.getInstance();
-        Kit kit = instance.getKitManager().getKit(kitName);
 
+        Kit kit = instance.getKitManager().getKit(kitName);
         if (kit == null) {
-            sender.sendMessage(CC.translate("&cKit dont exist"));
+            sender.sendMessage(CC.translate("&cKit does not exist."));
             return;
         }
 
@@ -44,18 +44,14 @@ public class ForceQueueCommand extends BaseCommand {
             return;
         }
 
-        if (instance.getQueueManager().getPlayersQueue().containsKey(target.getUniqueId())) {
+        if (instance.getQueueManager().isInQueue(target.getUniqueId())) {
             sender.sendMessage(CC.translate("&cThat player is already in a queue."));
             return;
         }
 
-        Queue queue = instance.getQueueManager().getQueue(kit, false);
-        if (queue == null) {
-            sender.sendMessage(CC.translate("&cQueue doesn't exist."));
-            return;
-        }
+        instance.getQueueManager().addPlayer(target, kit, false);
 
-        queue.add(target);
-        target.sendMessage(CC.translate("&fYou have been added to &b" + kit.getName() + " &fqueue"));
+        target.sendMessage(CC.translate("&fYou have been added to the &b" + kit.getName() + " &fqueue."));
+        sender.sendMessage(CC.translate("&aAdded &f" + target.getName() + " &ato the &b" + kit.getName() + " &aqueue."));
     }
 }
