@@ -1,5 +1,6 @@
 package lol.vifez.electron.game.divisions.menus;
 
+import lol.vifez.electron.util.DivisionUtil;
 import lol.vifez.electron.game.divisions.Divisions;
 import lol.vifez.electron.util.ItemBuilder;
 import lol.vifez.electron.util.menu.Menu;
@@ -8,7 +9,6 @@ import lol.vifez.electron.util.menu.button.impl.EasyButton;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class DivisionsMenu extends Menu {
 
     @Override
     public String getTitle(Player player) {
-        return "&7Divisions &7[&b" + page +"&7]";
+        return "&7Divisions &7[&b" + page + "&7]";
     }
 
     @Override
@@ -41,26 +41,23 @@ public class DivisionsMenu extends Menu {
     @Override
     public Map<Integer, Button> getButtons(Player player) {
         Map<Integer, Button> buttons = new HashMap<>();
-
-        List<Divisions> divisions = Arrays.asList(Divisions.values());
-
-        int startIndex = (page - 1) * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, divisions.size());
+        List<Divisions> divisions = DivisionUtil.getPage(page, ITEMS_PER_PAGE);
 
         int row = 1;
         int col = 0;
         int startSlot = 11;
 
-        for (int i = startIndex; i < endIndex; i++) {
-            Divisions division = divisions.get(i);
+        for (Divisions division : divisions) {
+            int slot = startSlot + col + ((row - 1) * 9);
 
-            int slot = startSlot + col + (row - 1) * 9;
             buttons.put(slot, new EasyButton(
                     new ItemBuilder(division.getMaterial())
                             .name(division.getPrettyName())
                             .lore("&7Minimum Elo: &b" + division.getMinimumElo())
                             .build(),
-                    true, false, () -> {}
+                    true,
+                    false,
+                    () -> {}
             ));
 
             col++;
@@ -74,7 +71,7 @@ public class DivisionsMenu extends Menu {
             buttons.put(36, nav("&cPrevious Page", page - 1, player));
         }
 
-        if (hasNextPage(divisions.size())) {
+        if (DivisionUtil.hasNextPage(page, ITEMS_PER_PAGE)) {
             buttons.put(44, nav("&aNext Page", page + 1, player));
         }
 
@@ -87,12 +84,9 @@ public class DivisionsMenu extends Menu {
                         .name(name)
                         .lore("&7Click to view page " + targetPage)
                         .build(),
-                true, false,
+                true,
+                false,
                 () -> new DivisionsMenu(targetPage).openMenu(player)
         );
-    }
-
-    private boolean hasNextPage(int total) {
-        return page * ITEMS_PER_PAGE < total;
     }
 }
