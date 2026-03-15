@@ -122,7 +122,7 @@ public class SpawnListener implements Listener {
 
         if (profile.isEditMode()) {
             profile.setEditMode(false);
-            event.getPlayer().getInventory().setContents(Hotbar.getSpawnItems());
+            event.getPlayer().getInventory().setContents(Practice.getInstance().getHotbarManager().getSpawnItems());
         }
     }
 
@@ -137,7 +137,7 @@ public class SpawnListener implements Listener {
 
             if (profile.isEditMode()) {
                 profile.setEditMode(false);
-                event.getPlayer().getInventory().setContents(Hotbar.getSpawnItems());
+                event.getPlayer().getInventory().setContents(Practice.getInstance().getHotbarManager().getSpawnItems());
             }
         }
     }

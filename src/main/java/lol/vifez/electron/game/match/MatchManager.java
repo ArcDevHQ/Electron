@@ -6,6 +6,7 @@ import lol.vifez.electron.hotbar.Hotbar;
 import lol.vifez.electron.game.kit.Kit;
 import lol.vifez.electron.game.match.enums.MatchState;
 import lol.vifez.electron.game.match.event.MatchEndEvent;
+import lol.vifez.electron.hotbar.HotbarManager;
 import lol.vifez.electron.profile.Profile;
 import lol.vifez.electron.util.CC;
 import org.bukkit.Bukkit;
@@ -144,7 +145,7 @@ public class MatchManager {
     }
 
     private void resetPlayerAfterMatch(Player player) {
-        player.getInventory().setContents(Hotbar.getSpawnItems());
+        player.getInventory().setContents(Practice.getInstance().getHotbarManager().getSpawnItems());
         player.getInventory().setArmorContents(null);
         player.teleport(Practice.getInstance().getSpawnLocation());
         player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));

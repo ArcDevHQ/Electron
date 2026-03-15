@@ -15,8 +15,8 @@ import lol.vifez.electron.commands.user.RematchCommand;
 import lol.vifez.electron.commands.user.SurrenderCommand;
 import lol.vifez.electron.game.divisions.commands.DivisionsCommand;
 import lol.vifez.electron.game.duel.command.DuelCommand;
-import lol.vifez.electron.hotbar.Hotbar;
 import lol.vifez.electron.hotbar.HotbarListener;
+import lol.vifez.electron.hotbar.HotbarManager;
 import lol.vifez.electron.game.kit.KitManager;
 import lol.vifez.electron.game.kit.commands.KitCommands;
 import lol.vifez.electron.leaderboard.Leaderboard;
@@ -74,6 +74,7 @@ public final class Practice extends JavaPlugin {
     @Getter private MatchManager matchManager;
     @Getter private QueueManager queueManager;
     @Getter private Leaderboard leaderboards;
+    @Getter private HotbarManager hotbarManager;
 
     @Getter @Setter private Location spawnLocation;
 
@@ -100,7 +101,9 @@ public final class Practice extends JavaPlugin {
 
     private void loadScoreboardConfig() {
         File file = new File(getDataFolder(), "scoreboard.yml");
-        if (!file.exists()) saveResource("scoreboard.yml", false);
+        if (!file.exists()) {
+            saveResource("scoreboard.yml", false);
+        }
         scoreboardConfig = new ScoreboardConfig();
     }
 
@@ -152,6 +155,7 @@ public final class Practice extends JavaPlugin {
         kitManager = new KitManager();
         queueManager = new QueueManager();
         leaderboards = new Leaderboard(profileManager);
+        hotbarManager = new HotbarManager();
     }
 
     private void registerCommands() {
@@ -207,8 +211,6 @@ public final class Practice extends JavaPlugin {
         sendMessage("&fKits: &b" + kitManager.getKits().size());
         sendMessage("&fArenas: &b" + arenaManager.getArenas().size());
         sendMessage(" ");
-
-        Hotbar.loadAll();
     }
 
     private void sendMessage(String message) {
@@ -221,8 +223,13 @@ public final class Practice extends JavaPlugin {
             profileManager.close();
         }
 
-        if (arenaManager != null) arenaManager.close();
-        if (kitManager != null) kitManager.close();
+        if (arenaManager != null) {
+            arenaManager.close();
+        }
+
+        if (kitManager != null) {
+            kitManager.close();
+        }
 
         if (mongoAPI != null) {
             mongoAPI.close();

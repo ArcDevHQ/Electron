@@ -90,7 +90,7 @@ public class ProfileListener implements Listener {
         }
 
         player.getInventory().setArmorContents(null);
-        player.getInventory().setContents(Hotbar.getSpawnItems());
+        player.getInventory().setContents(Practice.getInstance().getHotbarManager().getSpawnItems());
 
         player.sendTitle(CC.translate("&b&lPRACTICE"), CC.translate("&7Welcome to Practice (EU)"));
 

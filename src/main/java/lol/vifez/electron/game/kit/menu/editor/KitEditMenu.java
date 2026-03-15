@@ -49,7 +49,7 @@ public class KitEditMenu extends Menu {
         if (profile.isEditMode()) {
             profile.setEditMode(false);
             CC.sendMessage(player, "&cExited kit edit mode.");
-            player.getInventory().setContents(Hotbar.getSpawnItems());
+            player.getInventory().setContents(Practice.getInstance().getHotbarManager().getSpawnItems());
         }
     }
 
@@ -97,8 +97,8 @@ public class KitEditMenu extends Menu {
                         .build(),
                 true, false, () -> {
             new KitSelectMenu(instance).openMenu(player);
-            player.getInventory().setContents(Hotbar.getSpawnItems());
-        }));
+            player.getInventory().setContents(Practice.getInstance().getHotbarManager().getSpawnItems());
+                }));
 
         for (int i = 0; i < getSize(); i++) {
             map.putIfAbsent(i, new DisplayButton(
