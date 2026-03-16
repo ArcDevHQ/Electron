@@ -7,12 +7,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 @Getter
 public class Queue {
 
@@ -43,16 +37,7 @@ public class Queue {
 
     public String getFormattedQueueTime(UUID playerId) {
         Long joinTime = playerJoinTimes.get(playerId);
-        if (joinTime == null) {
-            return "00:00";
-        }
-
-        long elapsed = System.currentTimeMillis() - joinTime;
-        long seconds = elapsed / 1000;
-        long minutes = seconds / 60;
-        seconds %= 60;
-
-        return String.format("%02d:%02d", minutes, seconds);
+        return joinTime == null ? "00:00" : formatMinutesSeconds(joinTime);
     }
 
     public String getQueueTime(UUID playerId) {
@@ -60,16 +45,24 @@ public class Queue {
         if (joinTime == null) {
             return "0s";
         }
-
-        long elapsedTime = System.currentTimeMillis() - joinTime;
-        long seconds = elapsedTime / 1000;
-
+        long seconds = elapsedSeconds(joinTime);
         if (seconds < 60) {
             return seconds + "s";
-        } else if (seconds < 3600) {
-            return (seconds / 60) + "m";
-        } else {
-            return (seconds / 3600) + "h";
         }
+        if (seconds < 3600) {
+            return (seconds / 60) + "m";
+        }
+        return (seconds / 3600) + "h";
+    }
+
+    private String formatMinutesSeconds(long joinTime) {
+        long seconds = elapsedSeconds(joinTime);
+        long minutes = seconds / 60;
+        long remainder = seconds % 60;
+        return String.format("%02d:%02d", minutes, remainder);
+    }
+
+    private long elapsedSeconds(long joinTime) {
+        return (System.currentTimeMillis() - joinTime) / 1000;
     }
 }

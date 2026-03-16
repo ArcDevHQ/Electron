@@ -10,12 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
-/* 
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
-*/
-
 public class MatchListener implements Listener {
 
     private final Practice plugin;
@@ -27,11 +21,15 @@ public class MatchListener implements Listener {
 
     @EventHandler
     public void onDamageWhileStart(EntityDamageEvent event) {
-        if (!(event.getEntity() instanceof Player)) return;
+        if (!(event.getEntity() instanceof Player)) {
+            return;
+        }
 
         Player player = (Player) event.getEntity();
         Profile profile = plugin.getProfileManager().getProfile(player.getUniqueId());
-        if (profile == null || !profile.inMatch()) return;
+        if (profile == null || !profile.inMatch()) {
+            return;
+        }
 
         MatchState state = profile.getMatch().getMatchState();
         if (state == MatchState.STARTING || state == MatchState.ENDING || state == MatchState.ENDED) {
@@ -43,7 +41,9 @@ public class MatchListener implements Listener {
     public void onDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
         Profile profile = plugin.getProfileManager().getProfile(player.getUniqueId());
-        if (profile == null || !profile.inMatch()) return;
+        if (profile == null || !profile.inMatch()) {
+            return;
+        }
 
         Profile killer = profile.getMatch().getOpponent(profile);
 

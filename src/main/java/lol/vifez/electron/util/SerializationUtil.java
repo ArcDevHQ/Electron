@@ -11,25 +11,23 @@ import org.bukkit.util.io.BukkitObjectOutputStream;
 import java.io.*;
 import java.util.Base64;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 @UtilityClass
 public class SerializationUtil {
 
+    private static final Base64.Encoder ENCODER = Base64.getEncoder();
+    private static final Base64.Decoder DECODER = Base64.getDecoder();
+
     public String serializeItemStackArray(ItemStack[] items) {
-        if (items == null) return "";
+        if (items == null) {
+            return "";
+        }
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
              BukkitObjectOutputStream out = new BukkitObjectOutputStream(byteStream)) {
             out.writeInt(items.length);
             for (ItemStack item : items) {
                 out.writeObject(item);
             }
-            out.close();
-            return Base64.getEncoder().encodeToString(byteStream.toByteArray());
+            return ENCODER.encodeToString(byteStream.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -37,8 +35,10 @@ public class SerializationUtil {
     }
 
     public ItemStack[] deserializeItemStackArray(String data) {
-        if (data == null || data.isEmpty()) return new ItemStack[0];
-        try (ByteArrayInputStream byteStream = new ByteArrayInputStream(Base64.getDecoder().decode(data));
+        if (data == null || data.isEmpty()) {
+            return new ItemStack[0];
+        }
+        try (ByteArrayInputStream byteStream = new ByteArrayInputStream(DECODER.decode(data));
              BukkitObjectInputStream in = new BukkitObjectInputStream(byteStream)) {
             int length = in.readInt();
             ItemStack[] items = new ItemStack[length];
@@ -53,7 +53,9 @@ public class SerializationUtil {
     }
 
     public String serializeLocation(Location loc) {
-        if (loc == null || loc.getWorld() == null) return null;
+        if (loc == null || loc.getWorld() == null) {
+            return null;
+        }
         return loc.getWorld().getName() + "," +
                 loc.getX() + "," +
                 loc.getY() + "," +
@@ -63,12 +65,18 @@ public class SerializationUtil {
     }
 
     public Location deserializeLocation(String data) {
-        if (data == null || data.isEmpty()) return null;
+        if (data == null || data.isEmpty()) {
+            return null;
+        }
         String[] parts = data.split(",");
-        if (parts.length < 6) return null;
+        if (parts.length < 6) {
+            return null;
+        }
 
         World world = Bukkit.getWorld(parts[0]);
-        if (world == null) return null;
+        if (world == null) {
+            return null;
+        }
 
         try {
             double x = Double.parseDouble(parts[1]);
@@ -84,12 +92,13 @@ public class SerializationUtil {
     }
 
     public String serializeItemStack(ItemStack item) {
-        if (item == null) return "";
+        if (item == null) {
+            return "";
+        }
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
              BukkitObjectOutputStream out = new BukkitObjectOutputStream(byteStream)) {
             out.writeObject(item);
-            out.close();
-            return Base64.getEncoder().encodeToString(byteStream.toByteArray());
+            return ENCODER.encodeToString(byteStream.toByteArray());
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -97,8 +106,10 @@ public class SerializationUtil {
     }
 
     public ItemStack deserializeItemStack(String data) {
-        if (data == null || data.isEmpty()) return null;
-        try (ByteArrayInputStream byteStream = new ByteArrayInputStream(Base64.getDecoder().decode(data));
+        if (data == null || data.isEmpty()) {
+            return null;
+        }
+        try (ByteArrayInputStream byteStream = new ByteArrayInputStream(DECODER.decode(data));
              BukkitObjectInputStream in = new BukkitObjectInputStream(byteStream)) {
             return (ItemStack) in.readObject();
         } catch (IOException | ClassNotFoundException e) {

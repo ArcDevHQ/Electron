@@ -20,12 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 @RequiredArgsConstructor
 @Getter
 @Setter
@@ -60,12 +54,14 @@ public class Profile {
 
     public Player getPlayer() {
         Player player = Bukkit.getPlayer(uuid);
-        return (player != null && player.isOnline()) ? player : null;
+        return player != null && player.isOnline() ? player : null;
     }
 
     public int getPing() {
         Player player = getPlayer();
-        if (player == null) return -1;
+        if (player == null) {
+            return -1;
+        }
 
         try {
             Object handle = player.getClass().getMethod("getHandle").invoke(player);
@@ -103,9 +99,12 @@ public class Profile {
         int elo = getElo(kit);
         Divisions newDivision = division;
 
-        for (Divisions d : Divisions.values()) {
-            if (elo >= d.getMinimumElo()) newDivision = d;
-            else break;
+        for (Divisions current : Divisions.values()) {
+            if (elo >= current.getMinimumElo()) {
+                newDivision = current;
+            } else {
+                break;
+            }
         }
 
         if (newDivision != division) {
@@ -119,6 +118,9 @@ public class Profile {
 
     public void sendDuelRequest(Player target, Kit kit) {
         Player sender = getPlayer();
+        if (sender == null) {
+            return;
+        }
         Profile targetProfile = Practice.getInstance().getProfileManager().getProfile(target.getUniqueId());
 
         if (!duelRequestsEnabled) {
@@ -156,7 +158,6 @@ public class Profile {
                 "\n&f• From: &b" + name +
                 "\n&f• Kit: &b" + kit.getName() +
                 "\n&a&l[CLICK TO ACCEPT]")
-
                 .hover(true)
                 .clickable(true)
                 .hoverText("&bClick to accept")

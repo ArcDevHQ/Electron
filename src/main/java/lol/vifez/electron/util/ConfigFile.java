@@ -1,7 +1,6 @@
 package lol.vifez.electron.util;
 
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -10,134 +9,106 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-
-/**
- * Copyright (c) 2023 NotRemixed
- * <p>
- * Usage or redistribution of source code is permitted only if given
- * permission from the original author: NotRemixed
- */
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Getter
 public class ConfigFile {
 
+    private final JavaPlugin plugin;
     private final File file;
-    private FileConfiguration configuration;
     private final String defaultFileName;
+    private FileConfiguration configuration;
 
     public ConfigFile(JavaPlugin plugin, String fileName) {
+        this.plugin = plugin;
         this.defaultFileName = fileName;
         this.file = new File(plugin.getDataFolder(), fileName);
-
-        if (!this.file.exists()) {
-            plugin.saveResource(fileName, false);
-        }
-
+        ensureExists();
         this.configuration = YamlConfiguration.loadConfiguration(this.file);
     }
 
     public double getDouble(String path) {
-        if (configuration.contains(path)) {
-            return configuration.getDouble(path);
-        }
-        return 0;
+        return configuration.getDouble(path);
     }
 
     public int getInt(String path) {
-        if (configuration.contains(path)) {
-            return configuration.getInt(path);
-        }
-        return 0;
+        return configuration.getInt(path);
     }
 
     public boolean getBoolean(String path) {
-        if (configuration.contains(path)) {
-            return configuration.getBoolean(path);
-        }
-        return false;
+        return configuration.getBoolean(path);
     }
 
-    public long getLong(String path){
-        if (configuration.contains(path)){
-            return configuration.getLong(path);
-        }
-        return 0L;
+    public long getLong(String path) {
+        return configuration.getLong(path);
     }
 
     public String getString(String path) {
-        if (configuration.contains(path)) {
-            return ChatColor.translateAlternateColorCodes('&', configuration.getString(path));
-        }
-        return null;
+        return color(configuration.getString(path));
     }
 
-    public String getString(String path, String callback, boolean colorize) {
-        if (configuration.contains(path)) {
-            if (colorize) {
-                return ChatColor.translateAlternateColorCodes('&', configuration.getString(path));
-            } else {
-                return configuration.getString(path);
-            }
+    public String getString(String path, String fallback, boolean colorize) {
+        String value = configuration.getString(path);
+        if (value == null) {
+            return fallback;
         }
-        return callback;
+        return colorize ? color(value) : value;
     }
 
     public List<String> getReversedStringList(String path) {
-        List<String> list = getStringList(path);
-        if (list != null) {
-            int size = list.size();
-            List<String> toReturn = new ArrayList<>();
-            for (int i = size - 1; i >= 0; i--) {
-                toReturn.add(list.get(i));
-            }
-            return toReturn;
-        }
-        return Arrays.asList("ERROR: STRING LIST NOT FOUND!");
+        List<String> list = new ArrayList<>(getStringList(path));
+        Collections.reverse(list);
+        return list;
     }
 
     public List<String> getStringList(String path) {
-        if (configuration.contains(path)) {
-            ArrayList<String> strings = new ArrayList<>();
-            for (String string : configuration.getStringList(path)) {
-                strings.add(ChatColor.translateAlternateColorCodes('&', string));
-            }
-            return strings;
+        List<String> values = configuration.getStringList(path);
+        if (values == null) {
+            return Collections.emptyList();
         }
-        return Arrays.asList("ERROR: STRING LIST NOT FOUND!");
+        return values.stream()
+                .filter(Objects::nonNull)
+                .map(this::color)
+                .collect(Collectors.toList());
     }
 
-    public List<String> getStringListOrDefault(String path, List<String> toReturn) {
-        if (configuration.contains(path)) {
-            ArrayList<String> strings = new ArrayList<>();
-            for (String string : configuration.getStringList(path)) {
-                strings.add(ChatColor.translateAlternateColorCodes('&', string));
-            }
-            return strings;
+    public List<String> getStringListOrDefault(String path, List<String> fallback) {
+        List<String> values = configuration.getStringList(path);
+        if (values == null || values.isEmpty()) {
+            return fallback == null ? Collections.emptyList() : new ArrayList<>(fallback);
         }
-        return toReturn;
+        return values.stream()
+                .filter(Objects::nonNull)
+                .map(this::color)
+                .collect(Collectors.toList());
     }
 
     public void set(String path, Object value) {
-        try {
-            getConfiguration().set(path, value);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        configuration.set(path, value);
     }
 
     public void save() {
         try {
-            this.configuration.save(this.file);
-        }
-        catch (IOException e) {
-            Bukkit.getLogger().severe("Could not save config file " + this.file.toString());
-            e.printStackTrace();
+            configuration.save(file);
+        } catch (IOException e) {
+            plugin.getLogger().severe("Could not save config file " + file.getName());
         }
     }
 
     public void reload() {
         this.configuration = YamlConfiguration.loadConfiguration(file);
+    }
+
+    private void ensureExists() {
+        if (!file.exists()) {
+            plugin.saveResource(defaultFileName, false);
+        }
+    }
+
+    private String color(String value) {
+        return value == null ? null : ChatColor.translateAlternateColorCodes('&', value);
     }
 }

@@ -53,8 +53,8 @@ public class DuelRequest {
             sender.setDuelRequest(null);
             target.setDuelRequest(null);
 
-            CC.sendMessage(sender.getPlayer(), "&cError: There aren't any available arenas at the moment.");
-            CC.sendMessage(target.getPlayer(), "&cError: There aren't any available arenas at the moment.");
+            CC.sendMessage(sender.getPlayer(), "&cError: There aren't any available arenas at the moment."); // ????
+            CC.sendMessage(target.getPlayer(), "&cError: There aren't any available arenas at the moment."); // vifez ru retarded
             return;
         }
 

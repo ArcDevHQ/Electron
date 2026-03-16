@@ -10,36 +10,34 @@ import lol.vifez.electron.profile.Profile;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
+import java.util.stream.Collectors;
 
 public class BoardRenderer {
 
+    private final Practice plugin;
     private final BoardConfig boardConfig;
     private final BoardPlaceholders boardPlaceholders;
 
     public BoardRenderer(BoardConfig boardConfig, AnimationManager animationManager) {
+        this.plugin = Practice.getInstance();
         this.boardConfig = boardConfig;
         this.boardPlaceholders = new BoardPlaceholders(animationManager, boardConfig);
     }
 
     public List<String> render(Player player, Profile profile) {
-        List<String> lines = new ArrayList<>();
-
         Match match = profile.getMatch();
-        Queue queue = Practice.getInstance().getQueueManager().getQueue(profile.getUuid());
+        Queue queue = plugin.getQueueManager().getQueue(profile.getUuid());
 
         List<String> template = getTemplate(match, queue);
-        for (String line : template) {
-            lines.add(boardPlaceholders.apply(line, player, profile, match, queue));
+        if (template.isEmpty()) {
+            return Collections.emptyList();
         }
 
-        return lines;
+        return template.stream()
+                .map(line -> boardPlaceholders.apply(line, player, profile, match, queue))
+                .collect(Collectors.toList());
     }
 
     private List<String> getTemplate(Match match, Queue queue) {
@@ -56,17 +54,15 @@ public class BoardRenderer {
 
     private List<String> getMatchTemplate(Match match) {
         MatchState state = match.getMatchState();
-
-        if (state == MatchState.STARTING) {
-            return boardConfig.getStringList("SCOREBOARD.MATCH-STARTING.LINES");
+        switch (state) {
+            case STARTING:
+                return boardConfig.getStringList("SCOREBOARD.MATCH-STARTING.LINES");
+            case STARTED:
+                return match.getKit().getKitType() == KitType.BOXING
+                        ? boardConfig.getStringList("SCOREBOARD.IN-BOXING.LINES")
+                        : boardConfig.getStringList("SCOREBOARD.IN-GAME.LINES");
+            default:
+                return boardConfig.getStringList("SCOREBOARD.MATCH-ENDING.LINES");
         }
-
-        if (state == MatchState.STARTED) {
-            return match.getKit().getKitType() == KitType.BOXING
-                    ? boardConfig.getStringList("SCOREBOARD.IN-BOXING.LINES")
-                    : boardConfig.getStringList("SCOREBOARD.IN-GAME.LINES");
-        }
-
-        return boardConfig.getStringList("SCOREBOARD.MATCH-ENDING.LINES");
     }
 }
