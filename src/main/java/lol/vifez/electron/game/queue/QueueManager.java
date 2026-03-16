@@ -43,7 +43,7 @@ public class QueueManager {
         loadQueues();
 
         new QueueTask(this).runTaskTimerAsynchronously(instance, 20L, 20L);
-        new ActionBarTask(instance).runTaskTimer(instance, 0L, 20L);
+        new ActionBarTask(instance).runTaskTimer(instance, 0L, 2L);
     }
 
     private void loadQueues() {
