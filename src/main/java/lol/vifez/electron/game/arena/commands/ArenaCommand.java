@@ -192,7 +192,7 @@ public class ArenaCommand extends BaseCommand {
             return;
         }
 
-        arena.teleport(sender);
+        arenaManager.teleport(arena, sender);
     }
 
     @Subcommand("save")

@@ -125,7 +125,7 @@ public class ArenaEditorMenu extends Menu {
                         .lore("&fClick to teleport to this arena.")
                         .build(),
                 true, false, () -> {
-            arena.teleport(player);
+            arenaManager.teleport(arena, player);
         }
         ));
 

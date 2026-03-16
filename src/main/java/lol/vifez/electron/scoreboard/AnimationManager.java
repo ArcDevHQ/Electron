@@ -1,6 +1,7 @@
 package lol.vifez.electron.scoreboard;
 
 import lol.vifez.electron.Practice;
+import lol.vifez.electron.config.BoardConfig;
 import lombok.Getter;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -21,7 +22,7 @@ public class AnimationManager {
     private final AtomicInteger currentIndex = new AtomicInteger(0);
 
     public AnimationManager() {
-        ScoreboardConfig config = Practice.getInstance().getScoreboardConfig();
+        BoardConfig config = Practice.getInstance().getBoardConfig();
         frames = config.getStringList("ANIMATION.LINES");
         interval = config.getInt("ANIMATION.INTERVAL");
 

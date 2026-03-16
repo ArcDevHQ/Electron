@@ -34,8 +34,8 @@ import lol.vifez.electron.profile.repository.ProfileRepository;
 import lol.vifez.electron.game.queue.QueueManager;
 import lol.vifez.electron.game.queue.command.ForceQueueCommand;
 import lol.vifez.electron.game.queue.listener.QueueListener;
-import lol.vifez.electron.scoreboard.PracticeScoreboard;
-import lol.vifez.electron.scoreboard.ScoreboardConfig;
+import lol.vifez.electron.scoreboard.BoardAdapter;
+import lol.vifez.electron.config.BoardConfig;
 import lol.vifez.electron.settings.command.SettingsCommand;
 import lol.vifez.electron.util.*;
 import lol.vifez.electron.util.adapter.ItemStackArrayTypeAdapter;
@@ -64,7 +64,7 @@ public final class Practice extends JavaPlugin {
 
     @Getter private ConfigFile arenasFile;
     @Getter private ConfigFile kitsFile;
-    @Getter private ScoreboardConfig scoreboardConfig;
+    @Getter private BoardConfig boardConfig;
 
     @Getter private MongoAPI mongoAPI;
     @Getter private Gson gson;
@@ -82,7 +82,7 @@ public final class Practice extends JavaPlugin {
     public void onEnable() {
         instance = this;
         initializePlugin();
-        new Assemble(this, new PracticeScoreboard());
+        new Assemble(this, new BoardAdapter());
         VersionChecker.check();
     }
 
@@ -104,7 +104,7 @@ public final class Practice extends JavaPlugin {
         if (!file.exists()) {
             saveResource("scoreboard.yml", false);
         }
-        scoreboardConfig = new ScoreboardConfig();
+        boardConfig = new BoardConfig();
     }
 
     private void initializeConfigFiles() {
@@ -195,7 +195,7 @@ public final class Practice extends JavaPlugin {
 
     private void initializeDesign() {
         if (getConfig().getBoolean("scoreboard.enabled")) {
-            new Assemble(this, new PracticeScoreboard());
+            new Assemble(this, new BoardAdapter());
         }
     }
 
