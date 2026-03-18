@@ -15,10 +15,22 @@ It supports duels, kits, queues, arenas, leaderboards, and more. Still being **s
 
 Feel free to fork and contribute! 😎
 
-## 📣 Support
+---
 
-Need help or want to join the community?  
-[Join our Discord Server](https://discord.gg/kKKC85rkXU)
+## 🤝 Contributing
+
+Before opening a pull request, **read this first**:
+👉 [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md)
+
+### ⚠️ Contribution Status
+
+We are **not actively accepting contributions**.
+
+You are still free to open a PR, however:
+- It may not be reviewed
+- It may be closed without merging
+
+---
 
 ## What's Inside?
 - **Ranked lock** Unlock ranked queues after 10 unranked wins [toggleable]
@@ -42,9 +54,13 @@ Need help or want to join the community?
 - **Settings** Player-configurable options [scoreboard, messages, world time]
 *And More...*
 
+---
+
 # Support
 Need support? You can join our discord server and create a ticket!
 - [Join here](https://discord.gg/a9RhfWEMHJ)
+
+---
 
 ## 🛠 Permissions
 
@@ -54,15 +70,21 @@ Need support? You can join our discord server and create a ticket!
 | `electron.staff`    | Staff-level commands              |
 | `electron.user`     | Standard user commands            |
 
+---
+
 # Dependencies
 - 1.8
 - MongoDB
+
+---
 
 # Credits
 - **Vifez** - Main developer & Current maintainer
 - **MTR** - Contributed at the start
 - **Lugami** - Insane ass pull request
 - **Mqaaz** - Added 1 global title to scoreboard
+
+---
 
 # Compiling
 - Clone the repo to your intellij
@@ -71,5 +93,7 @@ Need support? You can join our discord server and create a ticket!
 - add `target/Electron-vX.X.X.jar` to ur server
 - run ur server for configs to load, add mongo
 - and boom... practice server!
+
 ---
-© vifez 2025
+
+© Arc Development @ 2026
