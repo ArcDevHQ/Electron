@@ -13,20 +13,16 @@ import org.bukkit.entity.Player;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 public class BoardPlaceholders {
 
     private final AnimationManager animationManager;
     private final BoardConfig boardConfig;
+    private final Practice plugin;
 
     public BoardPlaceholders(AnimationManager animationManager, BoardConfig boardConfig) {
         this.animationManager = animationManager;
         this.boardConfig = boardConfig;
+        this.plugin = Practice.getInstance();
     }
 
     public String apply(String text, Player player, Profile profile, Match match, Queue queue) {
@@ -34,86 +30,58 @@ public class BoardPlaceholders {
 
         String result = text;
         for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            result = result.replace(entry.getKey(), entry.getValue());
+            if (result.contains(entry.getKey())) {
+                result = result.replace(entry.getKey(), entry.getValue());
+            }
         }
-
         return result;
     }
 
     private Map<String, String> createPlaceholders(Player player, Profile profile, Match match, Queue queue) {
-        Practice plugin = Practice.getInstance();
-
         Map<String, String> placeholders = new LinkedHashMap<>();
 
         String globalElo = String.valueOf(EloUtil.getGlobalElo(profile));
-        String elo = getRelevantElo(profile, match, queue, globalElo);
-        String division = profile.getDivision().getPrettyName();
-        String footer = getOrDefault(boardConfig.getString("SCOREBOARD.FOOTER"), "");
-        String animation = animationManager.getCurrentFrame();
-
-        String online = String.valueOf(Bukkit.getOnlinePlayers().size());
-        String inQueue = String.valueOf(plugin.getQueueManager().getAllQueueSize());
-        String playing = String.valueOf(plugin.getMatchManager().getTotalPlayersInMatches());
-        String inFight = playing;
-
-        String ping = String.valueOf(profile.getPing());
-        String username = player.getName();
-
-        Profile opponent = match != null ? match.getOpponent(profile) : null;
-        int yourHits = match != null ? match.getHitsMap().getOrDefault(profile.getUuid(), 0) : 0;
-        int theirHits = match != null && opponent != null
-                ? match.getHitsMap().getOrDefault(opponent.getUuid(), 0)
-                : 0;
-
-        String opponentName = opponent != null ? opponent.getName() : "None";
-        String opponentPing = opponent != null ? String.valueOf(opponent.getPing()) : "0";
-        String duration = match != null ? match.getDuration() : "0";
-        String startingCountdown = match != null ? String.valueOf(match.getCurrentCountdown()) : "0";
-        String winner = match != null && match.getWinner() != null ? match.getWinner().getName() : "None";
-        String loser = getMatchLoser(match);
-
-        String kit = getKitDisplay(match, queue);
-        String time = getTimeDisplay(profile, match, queue);
+        String elo = resolveElo(profile, match, queue, globalElo);
 
         placeholders.put("<elo>", elo);
         placeholders.put("<global-elo>", globalElo);
-        placeholders.put("<division>", division);
-        placeholders.put("<footer>", footer);
-        placeholders.put("%animation%", animation);
+        placeholders.put("<division>", profile.getDivision().getPrettyName());
+        placeholders.put("<footer>", valueOrDefault(boardConfig.getString("SCOREBOARD.FOOTER"), ""));
+        placeholders.put("%animation%", animationManager.getCurrentFrame());
 
-        placeholders.put("<online>", online);
-        placeholders.put("<in-queue>", inQueue);
-        placeholders.put("<playing>", playing);
-        placeholders.put("<in-fight>", inFight);
+        placeholders.put("<online>", String.valueOf(Bukkit.getOnlinePlayers().size()));
+        placeholders.put("<in-queue>", String.valueOf(plugin.getQueueManager().getAllQueueSize()));
+        placeholders.put("<playing>", String.valueOf(plugin.getMatchManager().getTotalPlayersInMatches()));
+        placeholders.put("<in-fight>", String.valueOf(plugin.getMatchManager().getTotalPlayersInMatches()));
 
-        placeholders.put("<ping>", ping);
-        placeholders.put("<username>", username);
+        placeholders.put("<ping>", String.valueOf(profile.getPing()));
+        placeholders.put("<username>", player.getName());
 
-        placeholders.put("<opponent>", opponentName);
-        placeholders.put("<opponent-ping>", opponentPing);
-        placeholders.put("<duration>", duration);
-        placeholders.put("<difference>", formatHits(yourHits));
-        placeholders.put("<their-hits>", String.valueOf(theirHits));
-        placeholders.put("<your-hits>", String.valueOf(yourHits));
-        placeholders.put("<starting-c>", startingCountdown);
-        placeholders.put("<winner>", winner);
-        placeholders.put("<loser>", loser);
+        MatchContext context = new MatchContext(profile, match);
+        placeholders.put("<opponent>", context.opponentName);
+        placeholders.put("<opponent-ping>", context.opponentPing);
+        placeholders.put("<duration>", context.duration);
+        placeholders.put("<difference>", context.hitDifference);
+        placeholders.put("<diffrence>", context.hitDifference);
+        placeholders.put("<their-hits>", context.theirHits);
+        placeholders.put("<your-hits>", context.yourHits);
+        placeholders.put("<starting-c>", context.startingCountdown);
+        placeholders.put("<winner>", context.winner);
+        placeholders.put("<loser>", context.loser);
 
-        placeholders.put("<kit>", kit);
-        placeholders.put("<time>", time);
+        placeholders.put("<kit>", getKitDisplay(match, queue));
+        placeholders.put("<time>", getTimeDisplay(profile, match, queue));
 
         return placeholders;
     }
 
-    private String getRelevantElo(Profile profile, Match match, Queue queue, String globalElo) {
+    private String resolveElo(Profile profile, Match match, Queue queue, String globalElo) {
         if (match != null) {
             return String.valueOf(profile.getElo(match.getKit()));
         }
-
         if (queue != null) {
             return String.valueOf(profile.getElo(queue.getKit()));
         }
-
         return globalElo;
     }
 
@@ -143,28 +111,58 @@ public class BoardPlaceholders {
         return "0";
     }
 
+    private String valueOrDefault(String value, String defaultValue) {
+        return value == null ? defaultValue : value;
+    }
+
     private String formatHits(int hits) {
+        if (hits > 0) {
+            return "&a" + hits;
+        }
         if (hits < 0) {
             return "&c" + hits;
         }
-
-        if (hits == 0) {
-            return "&e" + hits;
-        }
-
-        return "&a" + hits;
+        return "&e0";
     }
 
-    private String getMatchLoser(Match match) {
-        if (match == null || match.getWinner() == null) {
-            return "None";
+    private final class MatchContext {
+        private final String opponentName;
+        private final String opponentPing;
+        private final String duration;
+        private final String hitDifference;
+        private final String theirHits;
+        private final String yourHits;
+        private final String startingCountdown;
+        private final String winner;
+        private final String loser;
+
+        private MatchContext(Profile profile, Match match) {
+            if (match == null) {
+                opponentName = "None";
+                opponentPing = "0";
+                duration = "0";
+                hitDifference = "&e0";
+                theirHits = "0";
+                yourHits = "0";
+                startingCountdown = "0";
+                winner = "None";
+                loser = "None";
+                return;
+            }
+
+            Profile opponent = match.getOpponent(profile);
+            opponentName = opponent != null ? opponent.getName() : "None";
+            opponentPing = opponent != null ? String.valueOf(opponent.getPing()) : "0";
+            duration = match.getDuration();
+            int yourHitsCount = match.getHitsMap().getOrDefault(profile.getUuid(), 0);
+            int theirHitsCount = opponent != null ? match.getHitsMap().getOrDefault(opponent.getUuid(), 0) : 0;
+            hitDifference = formatHits(yourHitsCount - theirHitsCount);
+            theirHits = String.valueOf(theirHitsCount);
+            yourHits = String.valueOf(yourHitsCount);
+            startingCountdown = String.valueOf(match.getCurrentCountdown());
+            winner = match.getWinner() != null ? match.getWinner().getName() : "None";
+            Profile possibleLoser = match.getWinner() != null ? match.getOpponent(match.getWinner()) : null;
+            loser = possibleLoser != null ? possibleLoser.getName() : "None";
         }
-
-        Profile loser = match.getOpponent(match.getWinner());
-        return loser != null ? loser.getName() : "None";
-    }
-
-    private String getOrDefault(String value, String defaultValue) {
-        return value == null ? defaultValue : value;
     }
 }

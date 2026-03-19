@@ -4,38 +4,42 @@ import co.aikar.commands.BukkitCommandManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.LongSerializationPolicy;
-import lol.vifez.electron.game.arena.ArenaManager;
-import lol.vifez.electron.game.arena.commands.ArenaCommand;
-import lol.vifez.electron.game.arena.commands.ArenasCommand;
 import lol.vifez.electron.chat.MessageCommand;
 import lol.vifez.electron.chat.ReplyCommand;
-import lol.vifez.electron.commands.admin.*;
+import lol.vifez.electron.commands.admin.BuildModeCommand;
+import lol.vifez.electron.commands.admin.ElectronCommand;
+import lol.vifez.electron.commands.admin.EloCommand;
+import lol.vifez.electron.commands.admin.RenameCommand;
+import lol.vifez.electron.commands.admin.SetSpawnCommand;
 import lol.vifez.electron.commands.staff.MoreCommand;
 import lol.vifez.electron.commands.user.RematchCommand;
 import lol.vifez.electron.commands.user.SurrenderCommand;
+import lol.vifez.electron.config.BoardConfig;
+import lol.vifez.electron.game.arena.ArenaManager;
+import lol.vifez.electron.game.arena.commands.ArenaCommand;
+import lol.vifez.electron.game.arena.commands.ArenasCommand;
 import lol.vifez.electron.game.divisions.commands.DivisionsCommand;
 import lol.vifez.electron.game.duel.command.DuelCommand;
-import lol.vifez.electron.hotbar.HotbarListener;
-import lol.vifez.electron.hotbar.HotbarManager;
 import lol.vifez.electron.game.kit.KitManager;
 import lol.vifez.electron.game.kit.commands.KitCommands;
-import lol.vifez.electron.leaderboard.Leaderboard;
-import lol.vifez.electron.leaderboard.command.LeaderboardCommand;
-import lol.vifez.electron.listeners.DeathListener;
-import lol.vifez.electron.listeners.EnderpearlListener;
-import lol.vifez.electron.listeners.SpawnListener;
 import lol.vifez.electron.game.match.MatchListener;
 import lol.vifez.electron.game.match.MatchManager;
 import lol.vifez.electron.game.match.task.MatchTask;
+import lol.vifez.electron.game.queue.QueueManager;
+import lol.vifez.electron.game.queue.command.ForceQueueCommand;
+import lol.vifez.electron.game.queue.listener.QueueListener;
+import lol.vifez.electron.leaderboard.Leaderboard;
+import lol.vifez.electron.leaderboard.command.LeaderboardCommand;
+import lol.vifez.electron.hotbar.HotbarListener;
+import lol.vifez.electron.hotbar.HotbarManager;
+import lol.vifez.electron.listeners.DeathListener;
+import lol.vifez.electron.listeners.EnderpearlListener;
+import lol.vifez.electron.listeners.SpawnListener;
 import lol.vifez.electron.mongo.MongoAPI;
 import lol.vifez.electron.navigator.command.NavigatorCommand;
 import lol.vifez.electron.profile.ProfileManager;
 import lol.vifez.electron.profile.repository.ProfileRepository;
-import lol.vifez.electron.game.queue.QueueManager;
-import lol.vifez.electron.game.queue.command.ForceQueueCommand;
-import lol.vifez.electron.game.queue.listener.QueueListener;
 import lol.vifez.electron.scoreboard.BoardAdapter;
-import lol.vifez.electron.config.BoardConfig;
 import lol.vifez.electron.settings.command.SettingsCommand;
 import lol.vifez.electron.util.*;
 import lol.vifez.electron.util.adapter.ItemStackArrayTypeAdapter;
@@ -48,14 +52,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.File;
-
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
 
 public final class Practice extends JavaPlugin {
 
@@ -81,66 +77,44 @@ public final class Practice extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        initializePlugin();
-        new Assemble(this, new BoardAdapter());
-        VersionChecker.check();
+        bootstrap();
     }
 
-    private void initializePlugin() {
+    private void bootstrap() {
         saveDefaultConfig();
-        loadScoreboardConfig();
-        initializeConfigFiles();
-
+        loadFiles();
         initializeServices();
         initializeManagers();
         registerCommands();
-        initializeListeners();
-        initializeDesign();
+        registerListeners();
+        registerScoreboard();
+        VersionChecker.check();
         displayStartupInfo();
     }
 
-    private void loadScoreboardConfig() {
-        File file = new File(getDataFolder(), "scoreboard.yml");
-        if (!file.exists()) {
-            saveResource("scoreboard.yml", false);
-        }
+    private void loadFiles() {
         boardConfig = new BoardConfig();
-    }
-
-    private void initializeConfigFiles() {
         arenasFile = new ConfigFile(this, "arenas.yml");
         kitsFile = new ConfigFile(this, "kits.yml");
     }
 
     private void initializeServices() {
-        initializeGson();
-        initializeMongo();
-        initializeSpawnLocation();
-        initializePlaceholderAPI();
-    }
-
-    private void initializeGson() {
         gson = new GsonBuilder()
                 .serializeNulls()
                 .setPrettyPrinting()
                 .setLongSerializationPolicy(LongSerializationPolicy.STRING)
                 .registerTypeAdapter(ItemStack[].class, new ItemStackArrayTypeAdapter())
                 .create();
-    }
 
-    private void initializeMongo() {
-        String uri = getConfig().getString("MONGO.URI");
-        String dbName = getConfig().getString("MONGO.DATABASE");
-        mongoAPI = new MongoAPI(uri, dbName);
-    }
+        mongoAPI = new MongoAPI(
+                getConfig().getString("MONGO.URI"),
+                getConfig().getString("MONGO.DATABASE")
+        );
 
-    private void initializeSpawnLocation() {
         spawnLocation = SerializationUtil.deserializeLocation(
                 getConfig().getString("SETTINGS.SPAWN-LOCATION", "world,0,100,0,0,0")
         );
-    }
 
-    private void initializePlaceholderAPI() {
         if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new ElectronPlaceholders(this).register();
         }
@@ -182,7 +156,7 @@ public final class Practice extends JavaPlugin {
         manager.registerCommand(new ForceQueueCommand());
     }
 
-    private void initializeListeners() {
+    private void registerListeners() {
         Bukkit.getPluginManager().registerEvents(new DeathListener(), this);
         new SpawnListener();
         new MatchListener(this);
@@ -193,8 +167,8 @@ public final class Practice extends JavaPlugin {
         new MenuAPI(this);
     }
 
-    private void initializeDesign() {
-        if (getConfig().getBoolean("scoreboard.enabled")) {
+    private void registerScoreboard() {
+        if (boardConfig.getBoolean("SCOREBOARD.ENABLED")) {
             new Assemble(this, new BoardAdapter());
         }
     }

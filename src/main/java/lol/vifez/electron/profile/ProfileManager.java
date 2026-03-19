@@ -11,12 +11,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/* 
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
-*/
-
 @Getter
 public class ProfileManager {
 
@@ -49,12 +43,6 @@ public class ProfileManager {
     }
 
     public void close() {
-        profiles.values().forEach(p -> {
-            try {
-                repository.saveData(p.getUuid().toString(), p).join();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        profiles.values().forEach(profile -> repository.saveData(profile.getUuid().toString(), profile).join());
     }
 }

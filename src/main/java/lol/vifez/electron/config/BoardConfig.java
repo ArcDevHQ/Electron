@@ -8,22 +8,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 public class BoardConfig {
 
-    private FileConfiguration config;
-    private File configFile;
+    private final FileConfiguration config;
+    private final File configFile;
 
     public BoardConfig() {
-        load();
-    }
-
-    public void load() {
         Practice plugin = Practice.getInstance();
         this.configFile = new File(plugin.getDataFolder(), "scoreboard.yml");
 

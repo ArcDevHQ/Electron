@@ -5,13 +5,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-
-/* 
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
-*/
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CC {
     public static final String BLUE = ChatColor.BLUE.toString();
@@ -51,6 +49,9 @@ public class CC {
     public static final String RIGHT_ARROW = StringEscapeUtils.unescapeJava("\u00bb");
 
     public static String translate(String in) {
+        if (in == null) {
+            return "";
+        }
         return ChatColor.translateAlternateColorCodes('&', in);
     }
 
@@ -59,15 +60,20 @@ public class CC {
     }
 
     public static List<String> translate(List<String> lines) {
-        List<String> toReturn = new ArrayList();
-        for (String line : lines) {
-            toReturn.add(ChatColor.translateAlternateColorCodes('&', line));
+        if (lines == null) {
+            return Collections.emptyList();
         }
-        return toReturn;
+        return lines.stream()
+                .filter(Objects::nonNull)
+                .map(CC::translate)
+                .collect(Collectors.toList());
     }
 
     public static List<String> translate(String[] lines) {
-        List<String> toReturn = new ArrayList();
+        if (lines == null || lines.length == 0) {
+            return Collections.emptyList();
+        }
+        List<String> toReturn = new ArrayList<>(lines.length);
         for (String line : lines) {
             if (line != null) {
                 toReturn.add(ChatColor.translateAlternateColorCodes('&', line));
@@ -78,7 +84,10 @@ public class CC {
 
 
     public static void sendMessage(CommandSender sender, String... message) {
-        for (String str : message) sender.sendMessage(colorize(str));
+        Arrays.stream(message)
+                .filter(Objects::nonNull)
+                .map(CC::colorize)
+                .forEach(sender::sendMessage);
     }
 
     public static String format(String in, Object... args) {

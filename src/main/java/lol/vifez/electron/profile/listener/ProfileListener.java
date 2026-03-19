@@ -20,12 +20,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.List;
 import java.util.UUID;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 public class ProfileListener implements Listener {
 
     private final Practice instance;
@@ -37,7 +31,9 @@ public class ProfileListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPreLogin(AsyncPlayerPreLoginEvent event) {
-        if (instance.getProfileManager() == null) return;
+        if (instance.getProfileManager() == null) {
+            return;
+        }
 
         ProfileManager manager = instance.getProfileManager();
         UUID uuid = event.getUniqueId();
@@ -51,32 +47,31 @@ public class ProfileListener implements Listener {
 
                     profile.setName(event.getName());
                     manager.save(profile);
-                })
-                .join();
+                }).join();
     }
 
     @EventHandler
     public void onPlayerRightClick(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
 
-        if (!(event.getRightClicked() instanceof Player)) return;
+        if (!(event.getRightClicked() instanceof Player)) {
+            return;
+        }
         Player target = (Player) event.getRightClicked();
 
         Profile playerProfile = instance.getProfileManager().getProfile(player.getUniqueId());
-        if (playerProfile == null) return;
+        if (playerProfile == null) {
+            return;
+        }
 
-        Match match = playerProfile.getMatch();
-
-        boolean inQueue = match != null && playerProfile.getQueue() != null;
-
-        Match activeMatch = instance.getMatchManager().getMatch(player.getUniqueId());
-
-        if (inQueue || activeMatch != null) {
+        if (playerProfile.getQueue() != null || playerProfile.inMatch()) {
             return;
         }
 
         Profile targetProfile = instance.getProfileManager().getProfile(target.getUniqueId());
-        if (targetProfile == null) return;
+        if (targetProfile == null) {
+            return;
+        }
 
         new ProfileMenu(targetProfile).openMenu(player);
     }

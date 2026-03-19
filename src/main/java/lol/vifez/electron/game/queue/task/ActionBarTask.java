@@ -11,12 +11,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.Map;
 import java.util.UUID;
 
-/* 
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
-*/
-
 public class ActionBarTask extends BukkitRunnable {
 
     private final Practice instance;

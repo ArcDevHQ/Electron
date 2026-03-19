@@ -18,16 +18,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 public class MatchManager {
 
+    private final Practice plugin = Practice.getInstance();
+    private final HotbarManager hotbarManager = plugin.getHotbarManager();
     private final Map<UUID, Match> matchByPlayer = new ConcurrentHashMap<>();
-
     private final Map<UUID, Match> activeMatches = new ConcurrentHashMap<>();
 
     public Match getMatch(UUID uuid) {
@@ -93,22 +88,10 @@ public class MatchManager {
         Profile loser = (winner == null) ? null : match.getOpponent(winner);
 
         if (winner != null && loser != null) {
-
-            winner.setWins(winner.getWins() + 1);
-            loser.setLosses(loser.getLosses() + 1);
-
-            winner.setWinStreak(winner.getWinStreak() + 1);
-            loser.setWinStreak(0);
-
-            winner.getKitWins().merge(
-                    match.getKit().getName(),
-                    1,
-                    Integer::sum
-            );
-        }
-
-        if (winner != null && loser != null && match.isRanked()) {
-            updateEloForRankedMatch(winner, loser, match.getKit());
+            updateRecords(winner, loser, match.getKit());
+            if (match.isRanked()) {
+                updateEloForRankedMatch(winner, loser, match.getKit());
+            }
         }
 
         Profile[] profiles = (winner == null || loser == null)
@@ -139,17 +122,29 @@ public class MatchManager {
 
         for (Profile profile : profiles) {
             if (profile != null) {
-                Practice.getInstance().getProfileManager().save(profile);
+                plugin.getProfileManager().save(profile);
             }
         }
     }
 
     private void resetPlayerAfterMatch(Player player) {
-        player.getInventory().setContents(Practice.getInstance().getHotbarManager().getSpawnItems());
+        player.getInventory().setContents(hotbarManager.getSpawnItems());
         player.getInventory().setArmorContents(null);
-        player.teleport(Practice.getInstance().getSpawnLocation());
+        if (plugin.getSpawnLocation() != null) {
+            player.teleport(plugin.getSpawnLocation());
+        }
         player.getActivePotionEffects().forEach(effect -> player.removePotionEffect(effect.getType()));
         player.updateInventory();
+    }
+
+    private void updateRecords(Profile winner, Profile loser, Kit kit) {
+        winner.setWins(winner.getWins() + 1);
+        loser.setLosses(loser.getLosses() + 1);
+
+        winner.setWinStreak(winner.getWinStreak() + 1);
+        loser.setWinStreak(0);
+
+        winner.getKitWins().merge(kit.getName(), 1, Integer::sum);
     }
 
     private void updateEloForRankedMatch(Profile winner, Profile loser, Kit kit) {

@@ -7,13 +7,7 @@ import com.google.gson.JsonParser;
 
 import java.util.TimeZone;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
-public class PracticeConstant {
+public final class PracticeConstant {
 
     public static final TimeZone TIME_ZONE = TimeZone.getTimeZone("GMT");
     public static final JsonParser JSON_PARSER = new JsonParser();
@@ -22,7 +16,10 @@ public class PracticeConstant {
             .disableHtmlEscaping()
             .create();
     public static final Gson PLAIN_GSON = new GsonBuilder().create();
-    public static Joiner SPACE_JOINER = Joiner.on(" ");
-    public static Joiner COMMA_JOINER = Joiner.on(", ");
+    public static final Joiner SPACE_JOINER = Joiner.on(" ");
+    public static final Joiner COMMA_JOINER = Joiner.on(", ");
 
+    private PracticeConstant() {
+        throw new AssertionError("No instance");
+    }
 }

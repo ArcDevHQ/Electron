@@ -10,12 +10,6 @@ import org.bson.Document;
 
 import java.util.concurrent.CompletableFuture;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 public class ProfileRepository extends MongoRepository<Profile> {
 
     public ProfileRepository(MongoAPI mongoAPI, Gson gson) {

@@ -15,18 +15,11 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
 
 @Getter
 public class QueueManager {
@@ -38,7 +31,7 @@ public class QueueManager {
     public QueueManager() {
         this.instance = Practice.getInstance();
         this.queueMap = new ConcurrentHashMap<>();
-        this.playersQueue = new HashMap<>();
+        this.playersQueue = new ConcurrentHashMap<>();
 
         loadQueues();
 
@@ -151,7 +144,7 @@ public class QueueManager {
         Player first = Bukkit.getPlayer(queuedPlayers.get(0));
         Player second = Bukkit.getPlayer(queuedPlayers.get(1));
 
-        if (first == null || second == null) {
+        if (first == null || second == null || !first.isOnline() || !second.isOnline()) {
             return;
         }
 

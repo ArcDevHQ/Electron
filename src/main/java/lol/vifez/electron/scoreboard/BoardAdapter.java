@@ -9,12 +9,6 @@ import org.bukkit.entity.Player;
 import java.util.Collections;
 import java.util.List;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 public class BoardAdapter implements AssembleAdapter {
 
     private final BoardConfig boardConfig;

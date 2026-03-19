@@ -11,14 +11,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.scheduler.BukkitRunnable;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 public class MatchTask extends BukkitRunnable {
 
+    private final Practice plugin = Practice.getInstance();
     private final MatchManager matchManager;
 
     public MatchTask(MatchManager matchManager) {
@@ -50,6 +45,14 @@ public class MatchTask extends BukkitRunnable {
                         cancel();
                         return;
                     }
+                    PlayerWrapper first = new PlayerWrapper(p1.getPlayer());
+                    PlayerWrapper second = new PlayerWrapper(p2.getPlayer());
+                    if (!first.isOnline() || !second.isOnline()) {
+                        match.setCountdownRunning(false);
+                        match.setCountdownTask(null);
+                        cancel();
+                        return;
+                    }
 
                     match.setCurrentCountdown(countdown);
 
@@ -60,8 +63,8 @@ public class MatchTask extends BukkitRunnable {
                         return;
                     }
 
-                    match.allowMovement(p1.getPlayer());
-                    match.allowMovement(p2.getPlayer());
+                    match.allowMovement(first.player);
+                    match.allowMovement(second.player);
 
                     match.setMatchState(MatchState.STARTED);
 
@@ -73,21 +76,42 @@ public class MatchTask extends BukkitRunnable {
                 }
             };
 
-            match.setCountdownTask(countdownTask.runTaskTimer(Practice.getInstance(), 0L, 20L));
+            match.setCountdownTask(countdownTask.runTaskTimer(plugin, 0L, 20L));
         }
     }
 
     private void sendOpponentFound(Match match, Profile self, Profile opponent) {
-        self.getPlayer().sendMessage(" ");
-        self.getPlayer().sendMessage(CC.colorize("&b&lOPPONENT FOUND"));
-        self.getPlayer().sendMessage(CC.colorize("&fKit: &b" + match.getKit().getName()));
-        self.getPlayer().sendMessage(CC.colorize("&fOpponent: &c" + opponent.getPlayer().getName()));
-        self.getPlayer().sendMessage(" ");
-        self.getPlayer().playSound(self.getPlayer().getLocation(), Sound.ORB_PICKUP, 1.0f, 1.0f);
+        PlayerWrapper player = new PlayerWrapper(self.getPlayer());
+        PlayerWrapper opponentPlayer = new PlayerWrapper(opponent.getPlayer());
+        if (!player.isOnline() || !opponentPlayer.isOnline()) {
+            return;
+        }
+        player.player.sendMessage(" ");
+        player.player.sendMessage(CC.colorize("&b&lOPPONENT FOUND"));
+        player.player.sendMessage(CC.colorize("&fKit: &b" + match.getKit().getName()));
+        player.player.sendMessage(CC.colorize("&fOpponent: &c" + opponentPlayer.player.getName()));
+        player.player.sendMessage(" ");
+        player.player.playSound(player.player.getLocation(), Sound.ORB_PICKUP, 1.0f, 1.0f);
     }
 
     private void tickCountdown(Profile profile, int countdown) {
-        profile.getPlayer().sendMessage(CC.colorize("&7Match Starting In &b" + countdown + "s"));
-        profile.getPlayer().playSound(profile.getPlayer().getLocation(), Sound.NOTE_PIANO, 0.5f, 0.5f);
+        PlayerWrapper player = new PlayerWrapper(profile.getPlayer());
+        if (!player.isOnline()) {
+            return;
+        }
+        player.player.sendMessage(CC.colorize("&7Match Starting In &b" + countdown + "s"));
+        player.player.playSound(player.player.getLocation(), Sound.NOTE_PIANO, 0.5f, 0.5f);
+    }
+
+    private static final class PlayerWrapper {
+        private final org.bukkit.entity.Player player;
+
+        private PlayerWrapper(org.bukkit.entity.Player player) {
+            this.player = player;
+        }
+
+        private boolean isOnline() {
+            return player != null && player.isOnline();
+        }
     }
 }

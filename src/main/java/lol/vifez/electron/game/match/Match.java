@@ -20,12 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/*
- * Electron © Vifez
- * Developed by Vifez
- * Copyright (c) 2025 Vifez. All rights reserved.
- */
-
 @Getter
 public class Match {
 
@@ -90,7 +84,6 @@ public class Match {
         if (uuid.equals(playerOne.getUuid())) {
             return playerTwo;
         }
-
         if (uuid.equals(playerTwo.getUuid())) {
             return playerOne;
         }
@@ -116,7 +109,6 @@ public class Match {
         if (player == null) {
             return;
         }
-
         player.removePotionEffect(PotionEffectType.JUMP);
         player.setHealth(player.getMaxHealth());
         player.setWalkSpeed(WALK_SPEED_NORMAL);
