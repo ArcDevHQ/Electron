@@ -26,6 +26,9 @@ Need help or want to join the community?
 - Conversations (/msg, /r)
 - Scoreboard (configurable)
 - Tablist (configurable)
+- BedFight support
+- Chunk Restorer
+- FireballFight/bridges support (coming soon..)
 - Join MOTD + Title
 - PlaceholderAPI Support (and custom placeholders)
 - MongoDB For data saving
