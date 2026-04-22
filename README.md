@@ -67,12 +67,6 @@ You are still free to open a PR, however:
 
 ---
 
-# Support
-Need support? You can join our discord server and create a ticket!
-- [Join here](https://discord.gg/a9RhfWEMHJ)
-
----
-
 ## 🛠 Permissions
 
 | Permission          | Description                      |
